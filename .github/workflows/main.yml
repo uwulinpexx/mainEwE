@@ -1,10 +1,9 @@
-name: Daily Key Update
+name: Test Key Update Every Minute
 
 on:
   schedule:
-    # Runs daily at 12:00 UTC
-    - cron: '0 12 * * *'
-  # Allows manual trigger from the Actions tab
+    # Runs every 1 minute (for testing!)
+    - cron: '* * * * *'
   workflow_dispatch:
 
 permissions:
@@ -28,7 +27,7 @@ jobs:
           git config user.name "Key Bot"
           git config user.email "bot@users.noreply.github.com"
           git add wha.txt
-          git commit -m "Update daily key"
+          git commit -m "Update test key"
           git push
 
       - name: Send new key to Discord
@@ -36,5 +35,5 @@ jobs:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           curl -H "Content-Type: application/json" \
-          -d "{\"content\": \"🔑 **Today's new key:** \`$NEW_KEY\`\"}" \
+          -d "{\"content\": \"🔑 **New test key:** \`$NEW_KEY\`\"}" \
           $WEBHOOK_URL
