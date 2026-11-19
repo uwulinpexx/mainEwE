@@ -1,0 +1,40 @@
+name: Daily Key Update
+
+on:
+  schedule:
+    # Runs daily at 12:00 UTC
+    - cron: '0 12 * * *'
+  # Allows manual trigger from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-key:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate key and update wha.txt
+        run: |
+          NEW_KEY="KEY-$(head /dev/urandom | tr -dc A-Z0-9 | head -c 8)"
+          echo "NEW_KEY=$NEW_KEY" >> $GITHUB_ENV
+          echo "$NEW_KEY" > wha.txt
+
+      - name: Commit and push updated key
+        run: |
+          git config user.name "Key Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add wha.txt
+          git commit -m "Update daily key"
+          git push
+
+      - name: Send new key to Discord
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d "{\"content\": \"🔑 **Today's new key:** \`$NEW_KEY\`\"}" \
+          $WEBHOOK_URL
